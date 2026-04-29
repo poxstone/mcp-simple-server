@@ -30,6 +30,10 @@ uv sync
 ### STDIO mode (default — local clients, Claude Desktop)
 
 ```bash
+export MCP_TRANSPORT="sse" # stdio by default
+export FASTMCP_HOST="127.0.0.1"
+export FASTMCP_PORT="8080"
+
 uv run python server.py
 ```
 
@@ -37,7 +41,7 @@ uv run python server.py
 
 ```bash
 MCP_TRANSPORT=sse uv run python server.py
-# Server listens on http://127.0.0.1:8000
+# Server listens on http://127.0.0.1:8080
 ```
 
 ### Interactive dev inspector (browser UI)
@@ -54,7 +58,10 @@ Open the URL printed in the terminal (usually `http://localhost:5173`) to intera
 
 ```bash
 docker build -t poxstone/mcp_simple_server .
-docker run -d -p 8000:8000 poxstone/mcp_simple_server
+docker run --rm -d -p 8080:8080 --name mcp-simple-server poxstone/mcp_simple_server
+
+# push
+docker push poxstone/mcp_simple_server
 ```
 
 ### With Docker Compose
@@ -65,7 +72,7 @@ docker compose logs -f      # follow logs
 docker compose down         # stop and remove
 ```
 
-The container starts in SSE mode by default, listening on `0.0.0.0:8000`.
+The container starts in SSE mode by default, listening on `0.0.0.0:8080`.
 
 ### Environment variables
 
@@ -73,14 +80,15 @@ The container starts in SSE mode by default, listening on `0.0.0.0:8000`.
 |----------|---------|-------------|
 | `MCP_TRANSPORT` | `sse` | `sse` for HTTP, `stdio` for local clients |
 | `FASTMCP_HOST` | `0.0.0.0` | Bind address |
-| `FASTMCP_PORT` | `8000` | Port |
+| `FASTMCP_PORT` | `8080` | Port |
 
 ## Testing
 
 ### Test client (stdio)
 
 ```bash
-uv run python test_client.py
+
+uv run python test_client.py --mcp_host http://localhost:8080 --test_url https://eltiempo.com
 ```
 
 ### Test client against the container (SSE)
@@ -91,7 +99,7 @@ from mcp import ClientSession
 from mcp.client.sse import sse_client
 
 async def main():
-    async with sse_client("http://localhost:8000/sse") as (read, write):
+    async with sse_client("http://localhost:8080/sse") as (read, write):
         async with ClientSession(read, write) as session:
             await session.initialize()
             result = await session.call_tool("add", {"a": 3, "b": 4})
@@ -139,7 +147,7 @@ Add the following block to your Claude Desktop config file:
 {
   "mcpServers": {
     "simple-server": {
-      "url": "http://localhost:8000/sse"
+      "url": "http://localhost:8080/sse"
     }
   }
 }
@@ -152,7 +160,7 @@ Add the following block to your Claude Desktop config file:
 claude mcp add simple-server -- uv run --project /absolute/path/to/mcp-simple-server python /absolute/path/to/mcp-simple-server/server.py
 
 # Container (SSE)
-claude mcp add simple-server --transport sse http://localhost:8000/sse
+claude mcp add simple-server --transport sse http://localhost:8080/sse
 ```
 
 ## Project structure

@@ -2,9 +2,10 @@
 MCP test client.
 
 Usage:
-    uv run python test_client.py                        # stdio (local)
-    uv run python test_client.py --host localhost       # SSE container
-    uv run python test_client.py --host localhost:9000  # SSE custom port
+    uv run python test_client.py                                                             # stdio (local)
+    uv run python test_client.py --mcp_host localhost                                       # SSE container
+    uv run python test_client.py --mcp_host localhost:9000                                  # SSE custom port
+    uv run python test_client.py --mcp_host localhost:8080 --test_url https://eltiempo.com  # custom server_info URL
 """
 import argparse
 import asyncio
@@ -18,11 +19,17 @@ from mcp.client.stdio import stdio_client
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="MCP simple server test client")
     parser.add_argument(
-        "--host",
+        "--mcp_host",
         default=None,
         metavar="HOST[:PORT]",
         help="Connect via SSE to this host (e.g. localhost or localhost:9000). "
              "Omit to use stdio (local server).",
+    )
+    parser.add_argument(
+        "--test_url",
+        default="https://example.com",
+        metavar="URL",
+        help="URL to pass to the server_info tool (default: https://example.com).",
     )
     return parser.parse_args()
 
@@ -36,7 +43,7 @@ async def get_session(host: str | None):
         else:
             # HOST[:PORT] shorthand → http
             if ":" not in host:
-                host = f"{host}:8080"
+                host = f"{host}"
             url = f"http://{host}/sse"
         print(f"Connecting via SSE → {url}\n")
         async with sse_client(url) as (read, write):
@@ -44,7 +51,7 @@ async def get_session(host: str | None):
                 await session.initialize()
                 yield session
     else:
-        params = StdioServerParameters(command="uv", args=["run", "python", "server.py"])
+        params = StdioServerParameters(command="uv", args=["run", "python", "mcp_server.py"])
         print("Connecting via stdio (local)\n")
         async with stdio_client(params) as (read, write):
             async with ClientSession(read, write) as session:
@@ -52,7 +59,10 @@ async def get_session(host: str | None):
                 yield session
 
 
-async def main(host: str | None) -> None:
+async def main(args) -> None:
+    host = args.mcp_host
+    test_url = args.test_url
+
     async with get_session(host) as session:
         # List available tools
         tools = await session.list_tools()
@@ -85,8 +95,8 @@ async def main(host: str | None) -> None:
         print(f"  greet('MCP')     → {result.content[0].text}")
 
         # Test server_info tool
-        print("\n=== Tool server_info (https://example.com) ===")
-        result = await session.call_tool("server_info", {"url": "https://example.com"})
+        print(f"\n=== Tool server_info ({test_url}) ===")
+        result = await session.call_tool("server_info", {"url": test_url})
         print(result.content[0].text)
 
         # Test prompt
@@ -100,4 +110,4 @@ async def main(host: str | None) -> None:
 
 
 args = parse_args()
-asyncio.run(main(args.host))
+asyncio.run(main(args))

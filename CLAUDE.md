@@ -99,11 +99,11 @@ Imagen publicada en Docker Hub: `poxstone/mcp_simple_server`
 uv run python test_client.py
 
 # SSE — host:puerto
-uv run python test_client.py --host localhost:8080
+uv run python test_client.py --mcp_host localhost:8080
 
 # SSE — solo host (agrega :8080 por defecto)
-uv run python test_client.py --host localhost
+uv run python test_client.py --mcp_host localhost
 
 # SSE — URL completa (Cloud Run, HTTPS)
-uv run python test_client.py --host https://mcp-simple-server-8326844300.us-central1.run.app
+uv run python test_client.py --mcp_host https://mcp-simple-server-8326844300.us-central1.run.app
 ```

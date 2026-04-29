@@ -6,7 +6,7 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-cache
 
-COPY server.py .
+COPY mcp_server.py .
 
 # MCP transport mode: "sse" for HTTP, "stdio" for local clients
 ENV MCP_TRANSPORT=sse
@@ -16,4 +16,4 @@ ENV FASTMCP_PORT=8080
 
 EXPOSE 8080
 
-CMD ["uv", "run", "python", "server.py"]
+CMD ["uv", "run", "python", "mcp_server.py"]

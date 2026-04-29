@@ -16,24 +16,34 @@ mcp = FastMCP(
 @mcp.tool()
 def add(a: float, b: float) -> float:
     """Add two numbers."""
-    return a + b
+    print(f"[add] IN  a={a}, b={b}")
+    result = a + b
+    print(f"[add] OUT {result}")
+    return result
 
 
 @mcp.tool()
 def multiply(a: float, b: float) -> float:
     """Multiply two numbers."""
-    return a * b
+    print(f"[multiply] IN  a={a}, b={b}")
+    result = a * b
+    print(f"[multiply] OUT {result}")
+    return result
 
 
 @mcp.tool()
 def greet(name: str) -> str:
     """Return a greeting for the given name."""
-    return f"Hello, {name}! Welcome to the MCP simple server."
+    print(f"[greet] IN  name={name!r}")
+    result = f"Hello, {name}! Welcome to the MCP simple server."
+    print(f"[greet] OUT {result!r}")
+    return result
 
 
 @mcp.tool()
 async def server_info(url: str) -> str:
     """Fetch HTTP headers, body preview, and DNS info (A + NS records) for a URL."""
+    print(f"[server_info] IN  url={url!r}")
     parsed = urlparse(url)
     hostname = parsed.hostname
 
@@ -96,7 +106,9 @@ async def server_info(url: str) -> str:
         "http": http_info,
     }
 
-    return json.dumps(result, indent=2, ensure_ascii=False)
+    output = json.dumps(result, indent=2, ensure_ascii=False)
+    print(f"[server_info] OUT status={result['http'].get('status_code', 'error')} dns_a={result['dns']['a_records']}")
+    return output
 
 
 @mcp.prompt()

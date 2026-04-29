@@ -1,0 +1,57 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "mcp_server.py — stdio",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "program": "${workspaceFolder}/mcp_server.py",
+      "env": {
+        "MCP_TRANSPORT": "stdio"
+      },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "mcp_server.py — SSE (localhost:8080)",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "program": "${workspaceFolder}/mcp_server.py",
+      "env": {
+        "MCP_TRANSPORT": "sse",
+        "FASTMCP_HOST": "127.0.0.1",
+        "FASTMCP_PORT": "8080"
+      },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "test_client.py — SSE localhost:8080",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "program": "${workspaceFolder}/test_client.py",
+      "args": [
+        "--mcp_host", "localhost:8080",
+        "--test_url", "https://eltiempo.com"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "test_client.py — SSE Cloud Run",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "program": "${workspaceFolder}/test_client.py",
+      "args": [
+        "--mcp_host", "https://mcp-simple-server-8326844300.us-central1.run.app",
+        "--test_url", "https://eltiempo.com",
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+  ]
+}
