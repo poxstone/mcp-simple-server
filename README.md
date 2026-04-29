@@ -34,20 +34,13 @@ export MCP_TRANSPORT="sse" # stdio by default
 export FASTMCP_HOST="127.0.0.1"
 export FASTMCP_PORT="8080"
 
-uv run python server.py
-```
-
-### SSE mode (HTTP — for remote clients or Docker)
-
-```bash
-MCP_TRANSPORT=sse uv run python mcp_server.py
-# Server listens on http://127.0.0.1:8080
+uv run python mcp_server.py
 ```
 
 ### Interactive dev inspector (browser UI)
 
 ```bash
-uv run mcp dev server.py
+uv run mcp dev mcp_server.py
 ```
 
 Open the URL printed in the terminal (usually `http://localhost:5173`) to interact with the server through the MCP Inspector.
@@ -134,7 +127,7 @@ Add the following block to your Claude Desktop config file:
       "args": [
         "run",
         "--project", "/absolute/path/to/mcp-simple-server",
-        "python", "/absolute/path/to/mcp-simple-server/server.py"
+        "python", "/absolute/path/to/mcp-simple-server/mcp_server.py"
       ]
     }
   }
@@ -157,7 +150,7 @@ Add the following block to your Claude Desktop config file:
 
 ```bash
 # Local (stdio)
-claude mcp add simple-server -- uv run --project /absolute/path/to/mcp-simple-server python /absolute/path/to/mcp-simple-server/server.py
+claude mcp add simple-server -- uv run --project /absolute/path/to/mcp-simple-server python /absolute/path/to/mcp-simple-server/mcp_server.py
 
 # Container (SSE)
 claude mcp add simple-server --transport sse http://localhost:8080/sse
@@ -167,7 +160,7 @@ claude mcp add simple-server --transport sse http://localhost:8080/sse
 
 ```
 mcp-simple-server/
-├── server.py          # MCP server definition
+├── mcp_server.py          # MCP server definition
 ├── test_client.py     # stdio test client
 ├── pyproject.toml     # Project metadata and dependencies
 ├── uv.lock            # Locked dependency versions
@@ -179,7 +172,7 @@ mcp-simple-server/
 
 ## Adding new tools
 
-Edit `server.py` and add a decorated function:
+Edit `mcp_server.py` and add a decorated function:
 
 ```python
 @mcp.tool()

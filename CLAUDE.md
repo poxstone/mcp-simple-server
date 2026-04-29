@@ -16,7 +16,7 @@ Desplegado como contenedor Docker en Google Cloud Run.
 ## Estructura
 
 ```
-server.py          # Definición del servidor MCP
+mcp_server.py          # Definición del servidor MCP
 test_client.py     # Cliente de prueba (stdio y SSE)
 pyproject.toml     # Dependencias uv
 uv.lock            # Versiones pinneadas
@@ -59,7 +59,7 @@ Puerto por defecto: **8080** — parametrizable con `FASTMCP_PORT`.
 
 `FastMCP.__init__` pasa `host` y `port` **explícitamente** al constructor de `Settings`,
 lo que sobreescribe las variables de entorno de pydantic-settings (`FASTMCP_HOST`, `FASTMCP_PORT`).
-Por eso en `server.py` se leen manualmente:
+Por eso en `mcp_server.py` se leen manualmente:
 
 ```python
 mcp = FastMCP(

@@ -22,7 +22,7 @@
       "python": "${workspaceFolder}/.venv/bin/python",
       "program": "${workspaceFolder}/test_client.py",
       "args": [
-        "--mcp_host", "https://localhost:8080",
+        "--mcp_host", "https://mcp-simple-server-8326844300.us-central1.run.app",
         "--test_url", "https://eltiempo.com",
       ],
       "cwd": "${workspaceFolder}",
