@@ -7,6 +7,7 @@ Usage:
     uv run python test_client.py --mcp_host localhost:9000                                  # SSE custom port
     uv run python test_client.py --mcp_host localhost:8080 --test_url https://eltiempo.com  # custom server_info URL
 """
+import json
 import argparse
 import asyncio
 from contextlib import asynccontextmanager
@@ -59,55 +60,80 @@ async def get_session(host: str | None):
                 yield session
 
 
+async def async_main(host, test_url):
+    """
+    Conecta al servidor MCP y ejecuta las pruebas.
+    Retorna el resultado como diccionario.
+    """
+    response_dict = {
+        "tools": {},
+        "resources": {},
+        "prompts": {},
+        "tools_results": {
+            "add_request": {"a": 3, "b": 4},
+            "multiply_request": {"a": 6, "b": 7},
+            "greet_request": {"name": "MCP"},
+            "server_info_request": {"url": test_url},
+            "calculate_prompt_request": {"operation": "+", "a": "10", "b": "5"},
+        },
+        "prompts_results": {}
+    }
+    async with get_session(host) as session:
+        # List available tools
+        try:
+            tools = await session.list_tools()
+            for t in tools.tools:
+                response_dict["tools"][t.name] = t
+        except Exception as exc:
+            print(f"Error listing tools: {exc}")
+
+        # List resources
+        try:
+            resources = await session.list_resources()
+            for r in resources.resources:
+                response_dict["resources"][r.uri] = r.name
+        except Exception as exc:
+            print(f"Error listing resources: {exc}")
+
+        # List prompts
+        try:
+            prompts = await session.list_prompts()
+            for p in prompts.prompts:
+                response_dict["prompts"][p.name] = p.description
+        except Exception as exc:
+            print(f"Error listing prompts: {exc}")
+
+        # Test tools
+        try:
+            result = await session.call_tool("add", response_dict["tools_results"]["add_request"])
+            response_dict["tools_results"]["add_response"] = result.content[0].text
+
+            result = await session.call_tool("multiply", response_dict["tools_results"]["multiply_request"])
+            response_dict["tools_results"]["multiply_response"] = result.content[0].text
+
+            result = await session.call_tool("greet", response_dict["tools_results"]["greet_request"])
+            response_dict["tools_results"]["greet_response"] = result.content[0].text
+
+            # Test server_info tool
+            result = await session.call_tool("server_info", response_dict["tools_results"]["server_info_request"])
+            response_dict["tools_results"]["server_info_response"] = json.loads(result.content[0].text)
+
+            # Test prompt
+            prompt = await session.get_prompt("calculate_prompt", response_dict["tools_results"]["calculate_prompt_request"])
+            response_dict["tools_results"]["calculate_response"] = prompt.messages[0].content.text
+        except Exception as exc:
+            print(f"Error calling tools: {exc}")
+
+        return response_dict
+
+
 async def main(args) -> None:
     host = args.mcp_host
     test_url = args.test_url
-
-    async with get_session(host) as session:
-        # List available tools
-        tools = await session.list_tools()
-        print("=== Tools disponibles ===")
-        for t in tools.tools:
-            print(f"  • {t.name}: {t.description}")
-
-        # List resources
-        resources = await session.list_resources()
-        print("\n=== Resources disponibles ===")
-        for r in resources.resources:
-            print(f"  • {r.uri}: {r.name}")
-
-        # List prompts
-        prompts = await session.list_prompts()
-        print("\n=== Prompts disponibles ===")
-        for p in prompts.prompts:
-            print(f"  • {p.name}: {p.description}")
-
-        # Test tools
-        print("\n=== Pruebas de tools ===")
-
-        result = await session.call_tool("add", {"a": 3, "b": 4})
-        print(f"  add(3, 4)        → {result.content[0].text}")
-
-        result = await session.call_tool("multiply", {"a": 6, "b": 7})
-        print(f"  multiply(6, 7)   → {result.content[0].text}")
-
-        result = await session.call_tool("greet", {"name": "MCP"})
-        print(f"  greet('MCP')     → {result.content[0].text}")
-
-        # Test server_info tool
-        print(f"\n=== Tool server_info ({test_url}) ===")
-        result = await session.call_tool("server_info", {"url": test_url})
-        print(result.content[0].text)
-
-        # Test prompt
-        prompt = await session.get_prompt(
-            "calculate_prompt", {"operation": "+", "a": "10", "b": "5"}
-        )
-        print(f"\n=== Prompt calculate_prompt ===")
-        print(f"  {prompt.messages[0].content.text}")
-
-        print("\n✓ Todas las pruebas pasaron correctamente.")
+    response_mcp = await async_main(host, test_url)
+    print(response_mcp)
 
 
-args = parse_args()
-asyncio.run(main(args))
+if __name__ == "__main__":
+    args = parse_args()
+    asyncio.run(main(args))

@@ -8,3 +8,6 @@ __pycache__
 test_client.py
 main.py
 README.md
+.claude
+.vscode
+README.md

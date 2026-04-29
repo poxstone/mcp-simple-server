@@ -40,7 +40,7 @@ uv run python server.py
 ### SSE mode (HTTP — for remote clients or Docker)
 
 ```bash
-MCP_TRANSPORT=sse uv run python server.py
+MCP_TRANSPORT=sse uv run python mcp_server.py
 # Server listens on http://127.0.0.1:8080
 ```
 
@@ -88,7 +88,7 @@ The container starts in SSE mode by default, listening on `0.0.0.0:8080`.
 
 ```bash
 
-uv run python test_client.py --mcp_host http://localhost:8080 --test_url https://eltiempo.com
+uv run python test_client.py --mcp_host https://localhost:8080 --test_url https://eltiempo.com
 ```
 
 ### Test client against the container (SSE)
